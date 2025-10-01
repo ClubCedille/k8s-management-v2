@@ -3484,12 +3484,12 @@ notifications:
     privateKey: $github-privateKey
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/subscriptions/
-  subscriptions: |
+  subscriptions:
     - recipients:
-      - github
+        - github
       triggers:
-      - on-deployed
-      - on-sync-failed
+        - on-deployed
+        - on-sync-failed
       selector: app.metadata.labels["app-type"] == "preview"
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
