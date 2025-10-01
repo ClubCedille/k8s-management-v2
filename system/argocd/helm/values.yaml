@@ -3512,7 +3512,7 @@ notifications:
         Application {{.app.metadata.name}} has been deployed successfully.
         Preview environment is ready!
       github:
-        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-repo\"}}"
+        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: success
@@ -3531,7 +3531,7 @@ notifications:
       message: |
         Application {{.app.metadata.name}} sync failed.
       github:
-        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-repo\"}}"
+        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: failure
