@@ -3348,7 +3348,7 @@ notifications:
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/overview/
   notifiers:
     service.github: |
-      appID: 20456652
+      appID: 2045665
       installationID: 88278572
       privateKey: $github-privateKey
 
