@@ -3490,7 +3490,7 @@ notifications:
       triggers:
         - on-deployed
         - on-sync-failed
-      selector: app.metadata.labels["app-type"] == "preview"
+      selector: app-type=preview
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
     #   - slack:test2
