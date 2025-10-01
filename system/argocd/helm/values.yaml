@@ -3503,7 +3503,7 @@ notifications:
   # -- The notification template is used to generate the notification content
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
   templates:
-    template.app-deployed: |
+    template.app-sync-succeeded: |
       message: |
         Application {{.app.metadata.name}} has been deployed successfully.
         Preview environment is ready!
@@ -3546,7 +3546,14 @@ notifications:
             ```
 
             **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
-
+    template.app-sync-running: |
+      github:
+        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
+        revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
+        status:
+          state: pending
+          label: preview-deployment
+          targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
     # template.app-deployed: |
     #   email:
     #     subject: New version of an application {{.app.metadata.name}} is up and running.
@@ -3764,17 +3771,19 @@ notifications:
   # -- The trigger defines the condition when the notification should be sent
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/
   triggers:
-    trigger.on-deployed: |
-      - description: Application is synced and healthy
+    trigger.on-sync-running: |
+      - description: Sync started
+        send: [app-sync-running]
+        when: app.status.operationState.phase in ['Running']
+    trigger.on-sync-succeeded: |
+      - description: Sync succeeded (one comment per commit)
         oncePer: app.status.sync.revision
-        send:
-        - app-deployed
-        when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+        send: [app-deployed]
+        when: app.status.operationState.phase in ['Succeeded']
     trigger.on-sync-failed: |
-      - description: Application sync failed
-        send:
-        - app-sync-failed
-        when: app.status.operationState.phase in ['Error', 'Failed']
+      - description: Sync failed
+        send: [app-sync-failed]
+        when: app.status.operationState.phase in ['Error','Failed']
     # trigger.on-deployed: |
     #   - description: Application is synced and healthy. Triggered once per commit.
     #     oncePer: app.status.sync.revision
