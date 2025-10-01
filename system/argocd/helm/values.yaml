@@ -3348,7 +3348,7 @@ notifications:
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/overview/
   notifiers:
     service.github: |
-      appID: 20456652w
+      appID: 20456652
       installationID: 88278572
       privateKey: $github-privateKey
 
@@ -3478,10 +3478,6 @@ notifications:
   clusterRoleRules:
     # -- List of custom rules for the notifications controller's ClusterRole resource
     rules: []
-  service.github: |
-    appID: 20456652
-    installationID: 88278572
-    privateKey: $github-privateKey
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/subscriptions/
   subscriptions:
