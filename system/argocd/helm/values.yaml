@@ -3528,7 +3528,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: failure
-          label: "preview-deployment"
+          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
           description: "{{ default \"Sync failed\" .app.status.operationState.message | trunc 140 }}"
         pullRequestComment:
@@ -3553,7 +3553,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: pending
-          label: "preview-deployment"
+          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
     # Sync succeeded: set success status
     template.app-sync-succeeded-status: |
@@ -3562,7 +3562,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: success
-          label: "preview-deployment"
+          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
     # Preview ready: app is healthy
     template.app-preview-ready: |
@@ -3573,7 +3573,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: success
-          label: "preview-deployment"
+          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
           targetURL: "https://pr-{{index .app.metadata.labels \"preview-pr-number\"}}.prodv2.cedille.club"
         pullRequestComment:
           content: |
