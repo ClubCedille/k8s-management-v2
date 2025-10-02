@@ -3518,7 +3518,7 @@ notifications:
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
         pullRequestComment:
           content: |
-            **Preview build started** for `{{.app.metadata.name}}` (commit `{{ .app.status.sync.revision }}`).
+            **Preview build started** for `{{.app.metadata.name}}` (commit `{{ index .app.metadata.labels "preview-pr-sha" }}`).
             I'll circle back when it's ready.
     template.app-sync-failed: |
       message: |
@@ -3584,7 +3584,7 @@ notifications:
 
             **Preview:** https://{{ index .app.metadata.labels "preview-host" }}
             **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
-            **Sync Revision:** `{{.app.status.sync.revision}}`
+            **Commit Revision:** `{{ index .app.metadata.labels "preview-pr-sha" }}`
     # template.app-deployed: |
     #   email:
     #     subject: New version of an application {{.app.metadata.name}} is up and running.
