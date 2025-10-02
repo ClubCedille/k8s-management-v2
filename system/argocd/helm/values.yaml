@@ -3487,7 +3487,7 @@ notifications:
         - on-build-started
         - on-sync-failed
         - on-preview-ready
-        - on-sync-succeeded 
+        - on-sync-succeeded
       selector: app-type=preview
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
@@ -3820,8 +3820,7 @@ notifications:
     trigger.on-sync-failed: |
       - description: Sync failed
         send: [app-sync-failed]
-      when: app.status.operationState.phase in ['Error','Failed']
-
+        when: app.status.operationState.phase in ['Error','Failed']
     # trigger.on-deployed: |
     #   - description: Application is synced and healthy. Triggered once per commit.
     #     oncePer: app.status.sync.revision
