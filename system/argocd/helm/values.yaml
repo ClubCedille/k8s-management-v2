@@ -3484,7 +3484,8 @@ notifications:
     - recipients:
         - github
       triggers:
-        - on-deployed
+        - on-sync-running
+        - on-sync-succeeded
         - on-sync-failed
       selector: app-type=preview
     # # subscription for on-sync-status-unknown trigger notifications
@@ -3778,7 +3779,7 @@ notifications:
     trigger.on-sync-succeeded: |
       - description: Sync succeeded (one comment per commit)
         oncePer: app.status.sync.revision
-        send: [app-deployed]
+        send: [app-sync-succeeded]
         when: app.status.operationState.phase in ['Succeeded']
     trigger.on-sync-failed: |
       - description: Sync failed
