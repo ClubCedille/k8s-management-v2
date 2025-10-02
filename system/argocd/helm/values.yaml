@@ -3484,9 +3484,10 @@ notifications:
     - recipients:
         - github
       triggers:
-        - on-sync-running
-        - on-sync-succeeded
+        - on-build-started
         - on-sync-failed
+        - on-preview-ready
+        - on-sync-succeeded 
       selector: app-type=preview
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
@@ -3504,26 +3505,21 @@ notifications:
   # -- The notification template is used to generate the notification content
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
   templates:
-    template.app-sync-succeeded: |
+    # Build started: first PR comment
+    template.app-build-started: |
       message: |
-        Application {{.app.metadata.name}} has been deployed successfully.
-        Preview environment is ready!
+        Sync started for {{.app.metadata.name}}. Building preview…
       github:
         repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
-          state: success
+          state: pending
           label: "preview-deployment"
-          targetURL: "https://pr-{{index .app.metadata.labels \"preview-pr-number\"}}.prodv2.cedille.club"
+          targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
         pullRequestComment:
           content: |
-            ## Preview Deployment Ready!
-            **PR #{{index .app.metadata.labels "preview-pr-number"}}**
-            **App:** `{{.app.metadata.name}}`
-            **Status:** {{.app.status.sync.status}} | **Health:** {{.app.status.health.status}}
-            - **Preview URL:** https://pr-{{index .app.metadata.labels "preview-pr-number"}}.prodv2.cedille.club
-            - **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
-            - **Sync Revision:** {{.app.status.sync.revision}}
+            **Preview build started** for `{{.app.metadata.name}}` (commit `{{ .app.status.sync.revision }}`).
+            I'll circle back when it's ready.
     template.app-sync-failed: |
       message: |
         Application {{.app.metadata.name}} sync failed.
@@ -3534,27 +3530,61 @@ notifications:
           state: failure
           label: "preview-deployment"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
+          description: "{{ default \"Sync failed\" .app.status.operationState.message | trunc 140 }}"
         pullRequestComment:
           content: |
             ## ❌ Preview Deployment Failed
 
-            **Application:** `{{.app.metadata.name}}`
+            **Application:** `{{.app.metadata.name}}`  
             **Status:** {{.app.status.sync.status}}
 
+            {{- if .app.status.operationState.message }}
             ### Error Details
             ```
-            {{.app.status.operationState.message}}
+            {{ .app.status.operationState.message }}
             ```
+            {{- end }}
 
             **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
+    # Sync started: set pending status
     template.app-sync-running: |
       github:
         repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: pending
-          label: preview-deployment
+          label: "preview-deployment"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
+    # Sync succeeded: set success status
+    template.app-sync-succeeded-status: |
+      github:
+        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
+        revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
+        status:
+          state: success
+          label: "preview-deployment"
+          targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+    # Preview ready: app is healthy
+    template.app-preview-ready: |
+      message: |
+        Application {{.app.metadata.name}} is Healthy. Preview ready!
+      github:
+        repoURLPath: "https://github.com/{{index .app.metadata.labels \"source-owner\"}}/{{index .app.metadata.labels \"source-repo\"}}"
+        revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
+        status:
+          state: success
+          label: "preview-deployment"
+          targetURL: "https://pr-{{index .app.metadata.labels \"preview-pr-number\"}}.prodv2.cedille.club"
+        pullRequestComment:
+          content: |
+            ## Preview Deployment Ready
+            **PR #{{index .app.metadata.labels "preview-pr-number"}}**  
+            **App:** `{{.app.metadata.name}}`  
+            **Health:** {{.app.status.health.status}}
+
+            **Preview:** https://pr-{{index .app.metadata.labels "preview-pr-number"}}.prodv2.cedille.club  
+            **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}  
+            **Sync Revision:** `{{.app.status.sync.revision}}`
     # template.app-deployed: |
     #   email:
     #     subject: New version of an application {{.app.metadata.name}} is up and running.
@@ -3772,19 +3802,26 @@ notifications:
   # -- The trigger defines the condition when the notification should be sent
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/
   triggers:
-    trigger.on-sync-running: |
-      - description: Sync started
-        send: [app-sync-running]
+    trigger.on-build-started: |
+      - description: Build started
+        oncePer: app.status.sync.revision
+        send: [app-build-started]
         when: app.status.operationState.phase in ['Running']
     trigger.on-sync-succeeded: |
-      - description: Sync succeeded (one comment per commit)
+      - description: Sync succeeded
         oncePer: app.status.sync.revision
-        send: [app-sync-succeeded]
+        send: [app-sync-succeeded-status]
         when: app.status.operationState.phase in ['Succeeded']
+    trigger.on-preview-ready: |
+      - description: Preview environment is Healthy
+        oncePer: app.status.sync.revision
+        send: [app-preview-ready]
+        when: app.status.health.status == 'Healthy'
     trigger.on-sync-failed: |
       - description: Sync failed
         send: [app-sync-failed]
-        when: app.status.operationState.phase in ['Error','Failed']
+      when: app.status.operationState.phase in ['Error','Failed']
+
     # trigger.on-deployed: |
     #   - description: Application is synced and healthy. Triggered once per commit.
     #     oncePer: app.status.sync.revision
