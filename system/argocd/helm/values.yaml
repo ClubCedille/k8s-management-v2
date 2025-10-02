@@ -3514,7 +3514,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: pending
-          label: "preview-deployment"
+          label: "preview/{{ .app.metadata.name }}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
         pullRequestComment:
           content: |
@@ -3528,14 +3528,14 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: failure
-          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
+          label: "preview/{{ .app.metadata.name }}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
           description: "{{ default \"Sync failed\" .app.status.operationState.message | trunc 140 }}"
         pullRequestComment:
           content: |
             ## ❌ Preview Deployment Failed
 
-            **Application:** `{{.app.metadata.name}}`  
+            **Application:** `{{.app.metadata.name}}`
             **Status:** {{.app.status.sync.status}}
 
             {{- if .app.status.operationState.message }}
@@ -3553,7 +3553,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: pending
-          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
+          label: "preview/{{ .app.metadata.name }}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true"
     # Sync succeeded: set success status
     template.app-sync-succeeded-status: |
@@ -3562,7 +3562,7 @@ notifications:
         revisionPath: "{{ index .app.metadata.labels \"preview-pr-sha\" }}"
         status:
           state: success
-          label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
+          label: "preview/{{ .app.metadata.name }}"
           targetURL: "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
     # Preview ready: app is healthy
     template.app-preview-ready: |
@@ -3578,11 +3578,11 @@ notifications:
         pullRequestComment:
           content: |
             ## Preview Deployment Ready
-            **PR #{{index .app.metadata.labels "preview-pr-number"}}**  
+            **PR #{{index .app.metadata.labels "preview-pr-number"}}**
             **App:** `{{.app.metadata.name}}`  
             **Health:** {{.app.status.health.status}}
 
-            **Preview:** https://{{ index .app.metadata.labels "preview-host" }} 
+            **Preview:** https://{{ index .app.metadata.labels "preview-host" }}
             **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
             **Sync Revision:** `{{.app.status.sync.revision}}`
     # template.app-deployed: |
@@ -3805,20 +3805,24 @@ notifications:
     trigger.on-build-started: |
       - description: Build started
         oncePer: app.status.sync.revision
-        send: [app-build-started]
+        send: [app-build-started, app-sync-running]
         when: app.status.operationState.phase in ['Running']
+
     trigger.on-sync-succeeded: |
       - description: Sync succeeded
         oncePer: app.status.sync.revision
         send: [app-sync-succeeded-status]
         when: app.status.operationState.phase in ['Succeeded']
+
     trigger.on-preview-ready: |
       - description: Preview environment is Healthy
         oncePer: app.status.sync.revision
         send: [app-preview-ready]
-        when: app.status.health.status == 'Healthy'
+        when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+
     trigger.on-sync-failed: |
       - description: Sync failed
+        oncePer: app.status.sync.revision
         send: [app-sync-failed]
         when: app.status.operationState.phase in ['Error','Failed']
     # trigger.on-deployed: |
