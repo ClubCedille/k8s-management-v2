@@ -3574,7 +3574,7 @@ notifications:
         status:
           state: success
           label: "preview-deployment/pr-{{index .app.metadata.labels \"preview-pr-number\"}}"
-          targetURL: "https://pr-{{index .app.metadata.labels \"preview-pr-number\"}}.prodv2.cedille.club"
+          targetURL: "https://{{ index .app.metadata.labels \"preview-host\" }}"
         pullRequestComment:
           content: |
             ## Preview Deployment Ready
@@ -3582,8 +3582,8 @@ notifications:
             **App:** `{{.app.metadata.name}}`  
             **Health:** {{.app.status.health.status}}
 
-            **Preview:** https://pr-{{index .app.metadata.labels "preview-pr-number"}}.prodv2.cedille.club  
-            **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}  
+            **Preview:** https://{{ index .app.metadata.labels "preview-host" }} 
+            **ArgoCD:** {{.context.argocdUrl}}/applications/{{.app.metadata.name}}
             **Sync Revision:** `{{.app.status.sync.revision}}`
     # template.app-deployed: |
     #   email:
