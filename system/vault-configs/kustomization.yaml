@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - resources/roles.yaml
+  - resources/cluster-role.yaml
   - resources/policies.yaml
   - resources/secret-engine.yaml
   - vault-test.yaml
