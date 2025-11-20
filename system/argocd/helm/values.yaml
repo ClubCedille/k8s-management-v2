@@ -198,6 +198,15 @@ configs:
     ## Ref: https://argo-cd.readthedocs.io/en/stable/user-guide/status-badge/
     statusbadge.enabled: false
 
+    # -- Resource exclusions to prevent ArgoCD from managing certain resources
+    resource.exclusions: |
+      - apiGroups:
+        - velero.io
+        kinds:
+        - Backup
+        clusters:
+        - '*'
+
     # Dex configuration ## edit secret kubectl edit secret argocd-authentik-secret -n argocd to add annotation app.kubernetes.io/part-of: argocd
     dex.config: |
       connectors:
