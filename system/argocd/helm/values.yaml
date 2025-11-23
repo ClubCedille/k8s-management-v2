@@ -573,29 +573,10 @@ configs:
     annotations: {}
 
     # -- Shared secret for authenticating GitHub webhook events
-    githubSecret: ""
-    # -- Shared secret for authenticating GitLab webhook events
-    gitlabSecret: ""
-    # -- Shared secret for authenticating BitbucketServer webhook events
-    bitbucketServerSecret: ""
-    # -- UUID for authenticating Bitbucket webhook events
-    bitbucketUUID: ""
-    # -- Shared secret for authenticating Gogs webhook events
-    gogsSecret: ""
-    ## Azure DevOps
-    azureDevops:
-      # -- Shared secret username for authenticating Azure DevOps webhook events
-      username: ""
-      # -- Shared secret password for authenticating Azure DevOps webhook events
-      password: ""
-
-    # -- add additional secrets to be added to argocd-secret
-    ## Custom secrets. Useful for injecting SSO secrets into environment variables.
-    ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
-    ## Note that all values must be non-empty.
-    extra: {}
-
-      # LDAP_PASSWORD: "mypassword"
+    githubSecret:
+      secretKeyRef:
+        name: argocd-webhook
+        key: github-secret-key
 
     # -- Bcrypt hashed admin password
     ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
@@ -3588,7 +3569,7 @@ notifications:
           content: |
             ## Preview Deployment Ready
             **PR #{{index .app.metadata.labels "preview-pr-number"}}**
-            **App:** `{{.app.metadata.name}}`  
+            **App:** `{{.app.metadata.name}}`
             **Health:** {{.app.status.health.status}}
 
             **Preview:** https://{{ index .app.metadata.labels "preview-host" }}
