@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - resources/roles.yaml
+  - resources/cluster-role.yaml
+  - resources/policies.yaml
+  - resources/secret-engine.yaml
+
+helmCharts:
+  - name: vault-config-operator
+    version: "0.8.29"
+    repo: "https://redhat-cop.github.io/vault-config-operator"
+    releaseName: "vault-config-operator"
+    namespace: vault
+    valuesFile: "helm/values.yaml"
+    includeCRDs: true
+  - name: vault-secrets-operator
+    version: "1.0.1"
+    repo: "https://helm.releases.hashicorp.com"
+    releaseName: "vault-secrets-operator"
+    namespace: vault
+    valuesFile: "helm/vault-secrets-operator.values.yaml"
