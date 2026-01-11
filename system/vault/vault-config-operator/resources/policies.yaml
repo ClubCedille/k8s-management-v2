@@ -41,4 +41,12 @@ spec:
     path "kv-system/*" {
       capabilities =  ["create", "read", "update", "delete", "list", "sudo"]
     }
+
+    path "kv-v2/*" {
+      capabilities =  ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
+    path "kv/*" {
+      capabilities =  ["create", "read", "update", "delete", "list", "sudo"]
+    }
 ---
