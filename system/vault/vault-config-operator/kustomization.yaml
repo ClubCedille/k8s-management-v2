@@ -15,9 +15,3 @@ helmCharts:
     namespace: vault
     valuesFile: "helm/values.yaml"
     includeCRDs: true
-  - name: vault-secrets-operator
-    version: "1.0.1"
-    repo: "https://helm.releases.hashicorp.com"
-    releaseName: "vault-secrets-operator"
-    namespace: vault
-    valuesFile: "helm/values.yaml"
