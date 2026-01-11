@@ -5,7 +5,7 @@ metadata:
 spec:
   authentication:
     path: kubernetes
-    role: common
+    role: config-admin
   policy: |
     # create secrets
     path "kv-shared/data/everyone/*" {

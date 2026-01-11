@@ -3,7 +3,6 @@ kind: KubernetesAuthEngineRole
 metadata:
   name: config-admin
 spec:
-  # Add fields here
   authentication:
     path: kubernetes
     role: config-admin
