@@ -573,10 +573,10 @@ configs:
     annotations: {}
 
     # -- Shared secret for authenticating GitHub webhook events
-    githubSecret:
-      secretKeyRef:
-        name: argocd-webhook
-        key: github-secret-key
+    # githubSecret:
+    #   secretKeyRef:
+    #     name: argocd-webhook
+    #     key: github-secret-key
 
     # -- Bcrypt hashed admin password
     ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
