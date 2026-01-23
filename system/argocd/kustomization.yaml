@@ -7,6 +7,7 @@ resources:
   - resources/base.yaml
   - resources/argocd-image-updater.yaml
   - resources/ingress.yaml
+  - resources/network-policy.yaml
 
 secretGenerator:
   - name: cluster-kubernetes.default.svc
