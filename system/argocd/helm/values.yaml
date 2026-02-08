@@ -3794,25 +3794,25 @@ notifications:
   triggers:
     trigger.on-build-started: |
       - description: Build started
-        oncePer: app.status.sync.revision
+        oncePer: app.metadata.labels.preview-pr-sha
         send: [app-build-started, app-sync-running]
         when: app.status.operationState.phase in ['Running']
 
     trigger.on-sync-succeeded: |
       - description: Sync succeeded
-        oncePer: app.status.sync.revision
+        oncePer: app.metadata.labels.preview-pr-sha
         send: [app-sync-succeeded-status]
         when: app.status.operationState.phase in ['Succeeded']
 
     trigger.on-preview-ready: |
       - description: Preview environment is Healthy
-        oncePer: app.status.sync.revision
+        oncePer: app.metadata.labels.preview-pr-sha
         send: [app-preview-ready]
         when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
 
     trigger.on-sync-failed: |
       - description: Sync failed
-        oncePer: app.status.sync.revision
+        oncePer: app.metadata.labels.preview-pr-sha
         send: [app-sync-failed]
         when: app.status.operationState.phase in ['Error','Failed']
     # trigger.on-deployed: |
